@@ -5,7 +5,7 @@ import (
 	"github.com/lbcoutinho/bookstore_users-api/utils/errors"
 )
 
-func CreateUser(user users.User) (*users.User, *errors.RestErr) {
+func Create(user users.User) (*users.User, *errors.RestErr) {
 	user.TrimSpace()
 
 	if err := user.Save(); err != nil {
@@ -14,7 +14,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-func GetUser(userId int64) (*users.User, *errors.RestErr) {
+func Get(userId int64) (*users.User, *errors.RestErr) {
 	user := &users.User{Id: userId}
 	if err := user.Get(); err != nil {
 		return nil, err
@@ -22,10 +22,10 @@ func GetUser(userId int64) (*users.User, *errors.RestErr) {
 	return user, nil
 }
 
-func UpdateUser(user users.User, isPartial bool) (*users.User, *errors.RestErr) {
+func Update(user users.User, isPartial bool) (*users.User, *errors.RestErr) {
 	user.TrimSpace()
 
-	current, err := GetUser(user.Id)
+	current, err := Get(user.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -51,4 +51,14 @@ func UpdateUser(user users.User, isPartial bool) (*users.User, *errors.RestErr) 
 	}
 
 	return current, nil
+}
+
+func Delete(userId int64) *errors.RestErr {
+	user := &users.User{Id: userId}
+
+	if err := user.Delete(); err != nil {
+		return err
+	}
+
+	return nil
 }

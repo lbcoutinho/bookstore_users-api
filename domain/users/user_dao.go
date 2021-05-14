@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	queryInsertUser      = "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)"
-	queryGetUserById     = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id = ?"
-	queryUpdateUser      = "UPDATE users SET first_name=?, last_name=?, email=? where id = ?"
+	queryInsertUser      = "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
+	queryGetUserById     = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id = ?;"
+	queryUpdateUser      = "UPDATE users SET first_name=?, last_name=?, email=? where id = ?;"
+	queryDeleteUser      = "DELETE FROM users WHERE id = ?;"
 	errorDuplicatedEntry = 1062
 	errorNoRows          = "no rows in result set"
 )
@@ -60,6 +61,20 @@ func (u *User) Update() *errors.RestErr {
 
 	_, err = stmt.Exec(u.FirstName, u.LastName, u.Email, u.Id)
 	if err != nil {
+		return mysql_utils.ParseError(err)
+	}
+
+	return nil
+}
+
+func (u *User) Delete() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryDeleteUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	if _, err = stmt.Exec(u.Id); err != nil {
 		return mysql_utils.ParseError(err)
 	}
 

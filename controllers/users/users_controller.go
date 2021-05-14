@@ -18,7 +18,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	result, saveErr := services.CreateUser(user)
+	result, saveErr := services.Create(user)
 	if saveErr != nil {
 		c.JSON(saveErr.Status, saveErr)
 		return
@@ -28,14 +28,13 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if userErr != nil {
-		err := errors.NewBadRequestError("User id should be a number")
-		c.JSON(err.Status, err)
+	userId, idErr := getUserIdFromPath(c.Param("userId"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
 		return
 	}
 
-	user, getErr := services.GetUser(userId)
+	user, getErr := services.Get(userId)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
 		return
@@ -45,10 +44,9 @@ func GetUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if userErr != nil {
-		err := errors.NewBadRequestError("User id should be a number")
-		c.JSON(err.Status, err)
+	userId, idErr := getUserIdFromPath(c.Param("userId"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
 		return
 	}
 
@@ -63,7 +61,7 @@ func UpdateUser(c *gin.Context) {
 	user.Id = userId
 	isPartial := c.Request.Method == http.MethodPatch
 
-	result, err := services.UpdateUser(user, isPartial)
+	result, err := services.Update(user, isPartial)
 	if err != nil {
 		c.JSON(err.Status, err)
 		return
@@ -72,6 +70,29 @@ func UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+func DeleteUser(c *gin.Context) {
+	userId, idErr := getUserIdFromPath(c.Param("userId"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
+		return
+	}
+
+	if err := services.Delete(userId); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
 func SearchUser(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "Not implemented!")
+}
+
+func getUserIdFromPath(userIdParam string) (int64, *errors.RestErr) {
+	userId, userErr := strconv.ParseInt(userIdParam, 10, 64)
+	if userErr != nil {
+		return 0, errors.NewBadRequestError("User id should be a number")
+	}
+	return userId, nil
 }
