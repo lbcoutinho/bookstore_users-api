@@ -9,6 +9,24 @@ import (
 	"strconv"
 )
 
+func CreateUser(c *gin.Context) {
+	var user users.User
+	// Unmarshal request body into user struct
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewBadRequestError("Invalid JSON body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	result, saveErr := services.CreateUser(user)
+	if saveErr != nil {
+		c.JSON(saveErr.Status, saveErr)
+		return
+	}
+
+	c.JSON(http.StatusCreated, result)
+}
+
 func GetUser(c *gin.Context) {
 	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if userErr != nil {
@@ -26,7 +44,14 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func CreateUser(c *gin.Context) {
+func UpdateUser(c *gin.Context) {
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("User id should be a number")
+		c.JSON(err.Status, err)
+		return
+	}
+
 	var user users.User
 	// Unmarshal request body into user struct
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -35,13 +60,16 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	result, saveErr := services.CreateUser(user)
-	if saveErr != nil {
-		c.JSON(saveErr.Status, saveErr)
+	user.Id = userId
+	isPartial := c.Request.Method == http.MethodPatch
+
+	result, err := services.UpdateUser(user, isPartial)
+	if err != nil {
+		c.JSON(err.Status, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, result)
+	c.JSON(http.StatusOK, result)
 }
 
 func SearchUser(c *gin.Context) {

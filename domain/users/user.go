@@ -1,7 +1,6 @@
 package users
 
 import (
-	"github.com/lbcoutinho/bookstore_users-api/utils/errors"
 	"strings"
 )
 
@@ -13,10 +12,8 @@ type User struct {
 	DateCreated string `json:"date_created"`
 }
 
-func (u *User) IsValid() *errors.RestErr {
-	u.Email = strings.TrimSpace(strings.ToLower(u.Email))
-	if u.Email == "" {
-		return errors.NewBadRequestError("Invalid email address")
-	}
-	return nil
+func (u *User) TrimSpace() {
+	u.FirstName = strings.TrimSpace(u.FirstName)
+	u.LastName = strings.TrimSpace(u.LastName)
+	u.Email = strings.TrimSpace(u.Email)
 }
