@@ -85,14 +85,22 @@ func DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
-func SearchUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "Not implemented!")
-}
-
 func getUserIdFromPath(userIdParam string) (int64, *errors.RestErr) {
 	userId, userErr := strconv.ParseInt(userIdParam, 10, 64)
 	if userErr != nil {
 		return 0, errors.NewBadRequestError("User id should be a number")
 	}
 	return userId, nil
+}
+
+func Search(c *gin.Context) {
+	status := c.Query("status")
+
+	users, err := services.Search(status)
+	if err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }

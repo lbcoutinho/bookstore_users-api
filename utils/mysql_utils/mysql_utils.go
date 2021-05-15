@@ -1,6 +1,7 @@
 package mysql_utils
 
 import (
+	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/lbcoutinho/bookstore_users-api/utils/errors"
 	"strings"
@@ -10,7 +11,6 @@ const (
 	errorDuplicatedEntry = 1062
 	errorNoRows          = "no rows in result set"
 )
-
 
 func ParseError(err error) *errors.RestErr {
 	mysqlErr, ok := err.(*mysql.MySQLError)
@@ -24,5 +24,6 @@ func ParseError(err error) *errors.RestErr {
 	if mysqlErr.Number == errorDuplicatedEntry {
 		return errors.NewBadRequestError("Invalid data. Unique index violated.")
 	}
+	fmt.Println(mysqlErr)
 	return errors.NewInternalServerError("Error processing request")
 }
