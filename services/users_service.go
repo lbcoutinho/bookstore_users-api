@@ -7,7 +7,20 @@ import (
 	"github.com/lbcoutinho/bookstore_users-api/utils/errors"
 )
 
-func Create(user users.User) (*users.User, *errors.RestErr) {
+var UserService userServiceInterface = &userService{}
+
+type userService struct {
+}
+
+type userServiceInterface interface {
+	Create(users.User) (*users.User, *errors.RestErr)
+	Get(int64) (*users.User, *errors.RestErr)
+	Update(users.User, bool) (*users.User, *errors.RestErr)
+	Delete(int64) *errors.RestErr
+	Search(string) (users.Users, *errors.RestErr)
+}
+
+func (us *userService) Create(user users.User) (*users.User, *errors.RestErr) {
 	user.TrimSpace()
 	if err := user.Validate(); err != nil {
 		return nil, err
@@ -22,7 +35,7 @@ func Create(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-func Get(userId int64) (*users.User, *errors.RestErr) {
+func (us *userService) Get(userId int64) (*users.User, *errors.RestErr) {
 	user := &users.User{Id: userId}
 	if err := user.Get(); err != nil {
 		return nil, err
@@ -30,10 +43,10 @@ func Get(userId int64) (*users.User, *errors.RestErr) {
 	return user, nil
 }
 
-func Update(user users.User, isPartial bool) (*users.User, *errors.RestErr) {
+func (us *userService) Update(user users.User, isPartial bool) (*users.User, *errors.RestErr) {
 	user.TrimSpace()
 
-	current, err := Get(user.Id)
+	current, err := us.Get(user.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +78,7 @@ func Update(user users.User, isPartial bool) (*users.User, *errors.RestErr) {
 	return current, nil
 }
 
-func Delete(userId int64) *errors.RestErr {
+func (us *userService) Delete(userId int64) *errors.RestErr {
 	user := &users.User{Id: userId}
 
 	if err := user.Delete(); err != nil {
@@ -75,7 +88,7 @@ func Delete(userId int64) *errors.RestErr {
 	return nil
 }
 
-func Search(status string) (users.Users, *errors.RestErr) {
+func (us *userService) Search(status string) (users.Users, *errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 }
