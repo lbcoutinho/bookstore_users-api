@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func CreateUser(c *gin.Context) {
+func Create(c *gin.Context) {
 	var user users.User
 	// Unmarshal request body into user struct
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -24,11 +24,11 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, result)
+	c.JSON(http.StatusCreated, result.Marshall(isPublicRequest(c)))
 }
 
-func GetUser(c *gin.Context) {
-	userId, idErr := getUserIdFromPath(c.Param("userId"))
+func Get(c *gin.Context) {
+	userId, idErr := getUserIdFromPath(c.Param("user_id"))
 	if idErr != nil {
 		c.JSON(idErr.Status, idErr)
 		return
@@ -40,11 +40,11 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, user.Marshall(isPublicRequest(c)))
 }
 
-func UpdateUser(c *gin.Context) {
-	userId, idErr := getUserIdFromPath(c.Param("userId"))
+func Update(c *gin.Context) {
+	userId, idErr := getUserIdFromPath(c.Param("user_id"))
 	if idErr != nil {
 		c.JSON(idErr.Status, idErr)
 		return
@@ -67,11 +67,11 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, result.Marshall(isPublicRequest(c)))
 }
 
-func DeleteUser(c *gin.Context) {
-	userId, idErr := getUserIdFromPath(c.Param("userId"))
+func Delete(c *gin.Context) {
+	userId, idErr := getUserIdFromPath(c.Param("user_id"))
 	if idErr != nil {
 		c.JSON(idErr.Status, idErr)
 		return
@@ -85,14 +85,6 @@ func DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
-func getUserIdFromPath(userIdParam string) (int64, *errors.RestErr) {
-	userId, userErr := strconv.ParseInt(userIdParam, 10, 64)
-	if userErr != nil {
-		return 0, errors.NewBadRequestError("User id should be a number")
-	}
-	return userId, nil
-}
-
 func Search(c *gin.Context) {
 	status := c.Query("status")
 
@@ -102,5 +94,17 @@ func Search(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, users.Marshall(isPublicRequest(c)))
+}
+
+func getUserIdFromPath(userIdParam string) (int64, *errors.RestErr) {
+	userId, userErr := strconv.ParseInt(userIdParam, 10, 64)
+	if userErr != nil {
+		return 0, errors.NewBadRequestError("User id should be a number")
+	}
+	return userId, nil
+}
+
+func isPublicRequest(c *gin.Context) bool {
+	return c.GetHeader("X-Public") == "true"
 }
