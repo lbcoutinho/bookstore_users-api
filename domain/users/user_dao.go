@@ -20,7 +20,7 @@ func (u *User) Save() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 	if err != nil {
 		logger.Error("Error while trying to prepare save user statement", err)
-		return errors.NewInternalServerError("Database error")
+		return newDatabaseError()
 	}
 	defer stmt.Close()
 
@@ -43,7 +43,7 @@ func (u *User) Get() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryGetUserById)
 	if err != nil {
 		logger.Error("Error while trying to prepare get user statement", err)
-		return errors.NewInternalServerError("Database error")
+		return newDatabaseError()
 	}
 	defer stmt.Close()
 
@@ -60,7 +60,7 @@ func (u *User) Update() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
 		logger.Error("Error while trying to prepare update user statement", err)
-		return errors.NewInternalServerError("Database error")
+		return newDatabaseError()
 	}
 	defer stmt.Close()
 
@@ -77,7 +77,7 @@ func (u *User) Delete() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryDeleteUser)
 	if err != nil {
 		logger.Error("Error while trying to prepare delete user statement", err)
-		return errors.NewInternalServerError("Database error")
+		return newDatabaseError()
 	}
 	defer stmt.Close()
 
@@ -93,7 +93,7 @@ func (u *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 	stmt, err := users_db.Client.Prepare(queryFindUserByStatus)
 	if err != nil {
 		logger.Error("Error while trying to prepare query users by status statement", err)
-		return nil, errors.NewInternalServerError("Database error")
+		return nil, newDatabaseError()
 	}
 	defer stmt.Close()
 

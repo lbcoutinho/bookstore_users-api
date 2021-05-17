@@ -1,4 +1,4 @@
-CREATE TABLE `users`
+CREATE TABLE `users_db`.`users`
 (
     `id`           bigint       NOT NULL AUTO_INCREMENT,
     `first_name`   varchar(255) DEFAULT NULL,
